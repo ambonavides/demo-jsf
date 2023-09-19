@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:f="http://java.sun.com/jsf/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+    <h:body>
+    	<ui:composition template="template/layout.xhtml">
+			<ui:define name="content">
+				<f:facet name="header">
+	                <h:outputText value="Cadastro de Usuário" />
+	            </f:facet>
+	
+                <h:form id="formExibe" styleClass="Card ShadowEffect HeiAutoOnMobile" >
+                    <p:fieldset  >
+                        <f:validateBean disabled="true">
+                            <div class="ui-grid ui-grid-responsive"  >
+                                <div class="ui-grid-row">
+                                    <div class="ui-grid-col">
+                                        <h:outputText value="Nome: " />
+                                        <p:inputText id="descricaoNome" value="#{usuarioBean.nome}" />
+                                        <p:message for="descricaoNome" style="color:red"/>
+                                    </div>
+
+                                    <p:spacer width="5" />
+
+                                    <div class="ui-grid-col">
+                                        <p:commandButton action="#{usuarioBean.pesquisar}" value="Pesquisar" icon="ui-icon-search" styleClass="CyanButton" update=":formExibe" />
+                                    </div>
+
+                                    <p:spacer width="5" />
+
+                                    <div class="ui-grid-col">
+                                        <p:commandButton id="addlink" title="Novo(a) Usuário" icon="ui-icon-circle-plus"
+                                                         value="Adicionar" action="#{usuarioBean.carregarIncluir}" update=":addPanel"
+                                                         process="@form" oncomplete="PF('addPanel').show()"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </f:validateBean>
+                    </p:fieldset>
+                    <h:panelGroup rendered="#{not empty usuarioBean.usuarios}">
+                        <p:separator />
+                        <p:dataTable id="table" emptyMessage="Nenhum registro encontrado."
+                                     cellpadding="0" cellspacing="0" border="0" rows="20" var="u"
+                                     paginator="true" value="#{usuarioBean.usuarios}"
+                                     rowStyleClass="order-table-odd-row,order-table-even-row">
+
+                            <f:facet name="header">
+                                <h:outputText value="Usuários - Total: #{fn:length(usuarioBean.usuarios)}" />
+                            </f:facet>
+
+                            <p:column sortBy="#{u.id}">
+                                <f:facet name="header">
+                                    <h:outputText value="Código" />
+                                </f:facet>
+                                <h:outputText value="#{u.id}" id="idView" style="font-weight:bold" />
+                            </p:column>
+
+                            <p:column sortBy="#{u.nome}">
+                                <f:facet name="header">
+                                    <h:outputText value="Nome" />
+                                </f:facet>
+                                <h:outputText value="#{u.nome}" id="nomeView" />
+                            </p:column>
+
+                            <p:column sortBy="#{u.dataNascimento}">
+                                <f:facet name="header">
+                                    <h:outputText value="Data de Nascimento" />
+                                </f:facet>
+                                <h:outputText value="#{u.dataNascimento}" id="dataNascimentoView" >
+                                	<f:convertDateTime pattern="dd/MM/yyyy" />
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column style="max-width:100px; min-width:100px;text-align: center !important;" exportable="false">
+                                <f:facet name="header">
+                                    <h:outputText value="Ações" />
+                                </f:facet>
+                                <p:commandButton id="editlink" update=":editPanel" process="@form" title="Editar"
+                                                 oncomplete="PF('editPanel').show()" 
+                                                 action="#{usuarioBean.carregarEditar}"
+                                                 icon="ui-icon-pencil">
+                                    <f:setPropertyActionListener value="#{u}" target="#{usuarioBean.usuario}"  />
+                                </p:commandButton>
+
+                                <p:spacer width="5" />
+
+                                <p:commandButton id="deletelink" update=":deletePanel" title="Excluir"
+                                                 process="@form" oncomplete="PF('deletePanel').show()" icon="ui-icon-trash">
+                                    <f:setPropertyActionListener value="#{u}" target="#{usuarioBean.usuario}" />
+                                </p:commandButton>
+
+                                <p:spacer width="5" />
+
+                                <p:commandButton ajax="true" id="exibeDetalheslink" title="Exibir Detalhes" update=":exibeDetalhesPanel"
+                                                 process="@form" oncomplete="if (!args.validationFailed) PF('exibeDetalhesPanel').show();"
+                                                 icon="ui-icon-document" >
+                                    <f:setPropertyActionListener value="#{u}" target="#{usuarioBean.usuario}" />
+                                </p:commandButton>
+
+                            </p:column>
+
+                        </p:dataTable>
+                    </h:panelGroup>
+                </h:form>
+	
+				<p:dialog id="addPanel" widgetVar="addPanel" modal="true" header="Novo(a) Usuário" appendTo="@(body)" closable="true" >
+					<h:form id="formAdd" styleClass="Card ShadowEffect HeiAutoOnMobile" enctype="multipart/form-data" >
+						<p:messages globalOnly="true" autoUpdate="true"/>
+						<h:panelGrid columns="1" >
+							<p:outputPanel autoUpdate="true">
+								<h:panelGrid columns="3">
+				
+									<h:outputText value="Nome (*)" />
+									<p:inputText id="nomeAdd" label="Nome"  required="true" size="30" value="#{usuarioBean.usuario.nome}">
+										<f:validateBean />
+									</p:inputText>
+									<p:message for="nomeAdd" style="color:red" />
+									
+									<h:outputText value="Nascimento: (*)" />
+									<p:calendar id="dataNascimentoAdd" label="Nascimento" showOn="button" 
+												locale="pt_BR" mask="true" pattern="dd/MM/yyyy"
+												required="true" size="30" value="#{usuarioBean.usuario.dataNascimento}">
+										<f:validateBean />
+									</p:calendar>
+									<p:message for="dataNascimentoAdd" style="color:red" />
+									
+									<h:outputText value="Descrição (*)" />
+									<h:column>
+										<p:inputTextarea rows="5" cols="34" counter="display" maxlength="80"
+	                         							 counterTemplate="{0} characters remaining." value="#{usuarioBean.usuario.descricao}">
+										</p:inputTextarea>
+										<br/>
+										<h:outputText id="display" class="block" />
+									</h:column>
+									<h:outputText/>
+				
+								</h:panelGrid>
+							</p:outputPanel>
+							<p:separator id="separator"/>
+							<h:panelGroup>
+								<p:commandButton value="INCLUIR" action="#{usuarioBean.incluir}"
+												 update="formAdd :formExibe" process="@form" ajax="true"
+												 oncomplete="if (!args.validationFailed) PF('addPanel').hide();" />
+								<p:spacer width="5" />
+								<p:commandButton value="CANCELAR" oncomplete="PF('addPanel').hide();"
+												 styleClass="GreenButton"
+												 update=":formExibe" process="@this">
+								</p:commandButton>
+							</h:panelGroup>
+						</h:panelGrid>
+					</h:form>
+				</p:dialog>
+	
+	            <p:dialog id="editPanel" widgetVar="editPanel" modal="true" header="Editar Usuário" appendTo="@(body)" closable="true" >
+	                <h:form id="formEdit" styleClass="Card ShadowEffect HeiAutoOnMobile" enctype="multipart/form-data" style="overflow: auto;" >
+	                    <p:messages globalOnly="true" autoUpdate="true"/>
+	                    <h:panelGrid columns="1" >
+	                        <p:outputPanel autoUpdate="true">
+								<h:panelGrid columns="3">
+				
+									<h:outputText value="Nome (*)" />
+									<p:inputText id="nomeAdd" label="Nome"  required="true" size="30" value="#{usuarioBean.usuario.nome}">
+										<f:validateBean />
+									</p:inputText>
+									<p:message for="nomeAdd" style="color:red" />
+									
+									<h:outputText value="Nascimento: (*)" />
+									<p:calendar id="dataNascimentoAdd" label="Nascimento" showOn="button" 
+												locale="pt_BR" mask="true" pattern="dd/MM/yyyy"
+												required="true" size="30" value="#{usuarioBean.usuario.dataNascimento}">
+										<f:validateBean />
+									</p:calendar>
+									<p:message for="dataNascimentoAdd" style="color:red" />
+									
+									<h:outputText value="Descrição (*)" />
+									<h:column>
+										<p:inputTextarea rows="5" cols="34" counter="display" maxlength="80"
+	                         							 counterTemplate="{0} characters remaining." value="#{usuarioBean.usuario.descricao}">
+										</p:inputTextarea>
+										<br/>
+										<h:outputText id="display" class="block" />
+									</h:column>
+									<h:outputText/>
+				
+								</h:panelGrid>
+	                        </p:outputPanel>
+							<p:separator id="separator"/>
+							<h:panelGroup>
+								<p:commandButton value="ALTERAR" action="#{usuarioBean.alterar}" process="@form"
+												 oncomplete="if (!args.validationFailed) PF('editPanel').hide();"
+												 update="formEdit :formExibe" />
+								<p:spacer width="5" />
+								<p:commandButton value="CANCELAR" oncomplete="PF('editPanel').hide();"
+												 styleClass="GreenButton"
+												 update=":formExibe" process="@this">
+								</p:commandButton>
+				
+							</h:panelGroup>                   
+	                    </h:panelGrid>
+	                </h:form>
+	            </p:dialog>
+	
+	            <p:dialog id="exibeDetalhesPanel" widgetVar="exibeDetalhesPanel" modal="true" header="Detalhes do(a) Usuário" appendTo="@(body)" closable="true" >
+	                <h:form id="formExibeDetalhesPanel" styleClass="Card ShadowEffect HeiAutoOnMobile" style="overflow: auto;" >
+	                    <h:panelGrid columns="1">
+	                        <p:outputPanel autoUpdate="false">
+	                            <h:panelGrid columns="2">
+	                            
+									<h:outputText value="Nome: " />
+									<h:outputText value="#{usuarioBean.usuario.nome}" />
+
+									<h:outputText value="Descrição: " />
+									<h:outputText value="#{usuarioBean.usuario.descricao}" />
+
+									<h:outputText value="Nascimento: " />
+									<h:outputText value="#{usuarioBean.usuario.dataNascimento}" >
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+	
+	                            </h:panelGrid>
+	                        </p:outputPanel>
+	                        <p:separator id="separator"/>
+	                        <h:panelGroup>
+	                            <p:commandButton value="FECHAR" oncomplete="PF('exibeDetalhesPanel').hide();"
+	                                             styleClass="GreenButton"
+	                                             update=":formExibe" process="@this">
+	                            </p:commandButton>
+	                        </h:panelGroup>
+	                    </h:panelGrid>
+	                </h:form>
+	            </p:dialog>
+	
+	            <p:confirmDialog id="deletePanel" closable="true" closeOnEscape="false" appendTo="@(body)"
+	                             message="Deseja Realmente Excluir o(a) Usuário: #{usuarioBean.usuario.nome}?"
+	                             widgetVar="deletePanel" modal="true" severity="alert">
+	                <h:form id="formDelete">
+	                    		<p:messages globalOnly="true" autoUpdate="true"/>
+								<p:commandButton value="CONFIRMAR" action="#{usuarioBean.excluir}" 
+												 oncomplete="if (!args.validationFailed) PF('deletePanel').hide();"
+												 update="formDelete :formExibe">
+								</p:commandButton>
+								<p:commandButton value="CANCELAR" update=":formExibe"
+												 styleClass="GreenButton"
+												 process="@this" oncomplete="PF('deletePanel').hide();">
+								</p:commandButton>
+	                </h:form>
+	            </p:confirmDialog>
+				
+    		</ui:define>
+    	</ui:composition>
+    </h:body>
+</html>
