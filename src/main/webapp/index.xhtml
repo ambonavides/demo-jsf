@@ -132,12 +132,21 @@
 									<h:outputText value="Descrição (*)" />
 									<h:column>
 										<p:inputTextarea rows="5" cols="34" counter="display" maxlength="80"
-	                         							 counterTemplate="{0} characters remaining." value="#{usuarioBean.usuario.descricao}">
+	                         							 counterTemplate="{0} caracteres restantes." value="#{usuarioBean.usuario.descricao}">
 										</p:inputTextarea>
 										<br/>
 										<h:outputText id="display" class="block" />
 									</h:column>
 									<h:outputText/>
+									
+									
+									<h:outputText value="Sexo (*)" />
+									<p:selectOneRadio  id="sexoAdd"  value="#{usuarioBean.usuario.sexo}" layout="pageDirection" style="width:6rem">
+										<f:selectItems value="#{usuarioBean.listaSexo}" />
+									</p:selectOneRadio >
+									<p:message for="sexoAdd" style="color:red" />									
+									
+									
 				
 								</h:panelGrid>
 							</p:outputPanel>
@@ -186,6 +195,12 @@
 										<h:outputText id="display" class="block" />
 									</h:column>
 									<h:outputText/>
+									
+									<h:outputText value="Sexo (*)" />
+									<p:selectOneRadio  id="sexoAdd"  value="#{usuarioBean.usuario.sexo}" layout="pageDirection" style="width:6rem">
+										<f:selectItems value="#{usuarioBean.listaSexo}" />
+									</p:selectOneRadio >
+									<p:message for="sexoAdd" style="color:red" />									
 				
 								</h:panelGrid>
 	                        </p:outputPanel>
@@ -221,6 +236,9 @@
 									<h:outputText value="#{usuarioBean.usuario.dataNascimento}" >
 										<f:convertDateTime pattern="dd/MM/yyyy" />
 									</h:outputText>
+
+									<h:outputText value="Nome: " />
+									<h:outputText value="#{usuarioBean.usuario.sexo}" />
 	
 	                            </h:panelGrid>
 	                        </p:outputPanel>

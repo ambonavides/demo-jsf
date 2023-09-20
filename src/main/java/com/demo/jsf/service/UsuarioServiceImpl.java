@@ -1,4 +1,4 @@
-package com.demo.jsf.model.service;
+package com.demo.jsf.service;
 
 import java.util.List;
 

@@ -1,10 +1,11 @@
-package com.demo.jsf.controle.bean;
+package com.demo.jsf.controle;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.faces.model.SelectItem;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.demo.jsf.model.entity.Usuario;
-import com.demo.jsf.model.service.UsuarioService;
+import com.demo.jsf.model.enums.SexoEnum;
+import com.demo.jsf.service.UsuarioService;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -37,6 +39,8 @@ public class UsuarioBean implements Serializable {
 	
 	private List<Usuario> usuarios;
 	
+	private List<SelectItem> listaSexo;
+	
 	@Autowired
 	private UsuarioService usuarioService;
 	
@@ -45,6 +49,14 @@ public class UsuarioBean implements Serializable {
 		this.usuario = new Usuario();
 		this.usuarioSelectec = new Usuario();
 		this.usuarios = usuarioService.findAll();
+		carregarSexo();
+	}
+
+	private void carregarSexo() {
+		this.listaSexo = new ArrayList<SelectItem>();
+		this.listaSexo.add(new SelectItem(SexoEnum.FEMININO));
+		this.listaSexo.add(new SelectItem(SexoEnum.MASCULINO));
+		this.listaSexo.add(new SelectItem(SexoEnum.OUTROS));
 	}
 	
 	public void carregarIncluir() {
