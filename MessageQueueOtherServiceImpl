@@ -1,97 +1,46 @@
-package br.com.santander.afj.infra.repositories.impl;
+const { CreateQueueCommand, SQSClient,SendMessageCommand } = require("@aws-sdk/client-sqs");
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+const client = new SQSClient({
+    region:"sa-east-1",
+    credentials:{
+        accessKeyId:"local",
+        secretAccessKey:"local"
+    },
+    apiVersion: '2012-11-05',
+    endpoint: "http://0.0.0.0:9324",
+    sslEnabled: false
+});
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+const SQS_QUEUE_NAME = "MyQueue";
 
-import br.com.santander.afj.domain.models.BalanceQueueMessage;
-import br.com.santander.afj.domain.repositories.MessageQueueOtherService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.services.sns.model.PublishRequest;
-import software.amazon.awssdk.services.sns.model.PublishResponse;
-import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
-import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
-import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class MessageQueueOtherServiceImpl implements MessageQueueOtherService {
+  const main = async (sqsQueueName = SQS_QUEUE_NAME) => {
+  const command = new CreateQueueCommand({
+    QueueName: sqsQueueName, 
+    Attributes: {
+      DelaySeconds: "60", 
+      MessageRetentionPeriod: "86400", 
+    },
+  });
 
-	@Value("${app.config.message.sqs.queue_other.topic}")
-	private String messageQueueTopic;
+  const response = await client.send(command);
+  console.log(response);
+};
 
-	private final SqsClient amazonSQSClient;
+const SQS_ORTHER_QUEUE_NAME = "OtherQueue";
 
-	private final SnsClient amazonSNSClient;
+const main2 = async (sqsQueueName = SQS_ORTHER_QUEUE_NAME) => {
+  const command = new CreateQueueCommand({
+    QueueName: sqsQueueName, 
+    Attributes: {
+      DelaySeconds: "60", 
+      MessageRetentionPeriod: "86400", 
+    },
+  });
 
-	private final RedisRepositoryImpl redisRepositoryImpl;
+  const response = await client.send(command);
+  console.log(response);
+};
 
-	@Scheduled(fixedDelay = 5000)
-	public void receiveMessages() {
-
-		GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder().queueName(messageQueueTopic).build();
-
-		String queueUrl = amazonSQSClient.getQueueUrl(getQueueRequest).queueUrl();
-
-		ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder().queueUrl(queueUrl)
-				.maxNumberOfMessages(5).build();
-
-		var result = amazonSQSClient.receiveMessage(receiveMessageRequest).messages();
-
-		Gson gson = new Gson();
-		
-		if (!result.isEmpty()) {
-			result.forEach(m -> {
-				var balance = gson.fromJson(m.body(), BalanceQueueMessage.class);
-				String pedido = String.join(":", "balance", balance.getContractCode(), balance.getBankCode());
-				redisRepositoryImpl.saveObjectToList(pedido, gson.toJson(balance));
-				deleteQueueObject(queueUrl, m);
-			});
-		}
-
-	}
-
-	@Override
-	public void sendMessages(BalanceQueueMessage balanceQueueMessage) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-
-			SendMessageRequest sendMsgRequest = SendMessageRequest.builder()
-					.queueUrl(amazonSQSClient
-							.getQueueUrl(GetQueueUrlRequest.builder().queueName(messageQueueTopic).build()).queueUrl())
-					.messageBody(mapper.writeValueAsString(balanceQueueMessage)).delaySeconds(5).build();
-
-			amazonSQSClient.sendMessage(sendMsgRequest);
-		} catch (Exception e) {
-			log.error("Não foi possível postar na fila");
-		}
-	}
-
-	@Override
-	public void publishMessage(BalanceQueueMessage balanceQueueMessage) {
-		PublishResponse result = amazonSNSClient
-				.publish(PublishRequest.builder().message(balanceQueueMessage.getContractCode())
-						.topicArn("arn:aws:sns:sa-east-1:123456789012:my-topic").build());
-
-		log.info("Objeto publicado na fila", result.messageId());
-	}
-	
-	private void deleteQueueObject(String queueUrl, Message m) {
-		DeleteMessageRequest deleteMessageRequest =
-		        DeleteMessageRequest.builder()
-		                .queueUrl(queueUrl)
-		                .receiptHandle(m.receiptHandle())
-		                .build();
-		amazonSQSClient.deleteMessage(deleteMessageRequest);
-	}
-	
-}
+main() 
+main2() 
