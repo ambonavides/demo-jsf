@@ -1,0 +1,97 @@
+package br.com.santander.afj.infra.repositories.impl;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+
+import br.com.santander.afj.domain.models.BalanceQueueMessage;
+import br.com.santander.afj.domain.repositories.MessageQueueOtherService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
+import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class MessageQueueOtherServiceImpl implements MessageQueueOtherService {
+
+	@Value("${app.config.message.sqs.queue_other.topic}")
+	private String messageQueueTopic;
+
+	private final SqsClient amazonSQSClient;
+
+	private final SnsClient amazonSNSClient;
+
+	private final RedisRepositoryImpl redisRepositoryImpl;
+
+	@Scheduled(fixedDelay = 5000)
+	public void receiveMessages() {
+
+		GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder().queueName(messageQueueTopic).build();
+
+		String queueUrl = amazonSQSClient.getQueueUrl(getQueueRequest).queueUrl();
+
+		ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder().queueUrl(queueUrl)
+				.maxNumberOfMessages(5).build();
+
+		var result = amazonSQSClient.receiveMessage(receiveMessageRequest).messages();
+
+		Gson gson = new Gson();
+		
+		if (!result.isEmpty()) {
+			result.forEach(m -> {
+				var balance = gson.fromJson(m.body(), BalanceQueueMessage.class);
+				String pedido = String.join(":", "balance", balance.getContractCode(), balance.getBankCode());
+				redisRepositoryImpl.saveObjectToList(pedido, gson.toJson(balance));
+				deleteQueueObject(queueUrl, m);
+			});
+		}
+
+	}
+
+	@Override
+	public void sendMessages(BalanceQueueMessage balanceQueueMessage) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+
+			SendMessageRequest sendMsgRequest = SendMessageRequest.builder()
+					.queueUrl(amazonSQSClient
+							.getQueueUrl(GetQueueUrlRequest.builder().queueName(messageQueueTopic).build()).queueUrl())
+					.messageBody(mapper.writeValueAsString(balanceQueueMessage)).delaySeconds(5).build();
+
+			amazonSQSClient.sendMessage(sendMsgRequest);
+		} catch (Exception e) {
+			log.error("Não foi possível postar na fila");
+		}
+	}
+
+	@Override
+	public void publishMessage(BalanceQueueMessage balanceQueueMessage) {
+		PublishResponse result = amazonSNSClient
+				.publish(PublishRequest.builder().message(balanceQueueMessage.getContractCode())
+						.topicArn("arn:aws:sns:sa-east-1:123456789012:my-topic").build());
+
+		log.info("Objeto publicado na fila", result.messageId());
+	}
+	
+	private void deleteQueueObject(String queueUrl, Message m) {
+		DeleteMessageRequest deleteMessageRequest =
+		        DeleteMessageRequest.builder()
+		                .queueUrl(queueUrl)
+		                .receiptHandle(m.receiptHandle())
+		                .build();
+		amazonSQSClient.deleteMessage(deleteMessageRequest);
+	}
+	
+}
