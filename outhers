@@ -1,1 +1,4 @@
 
+spring.cloud.aws.credentials.accessKey=seu_access_key
+spring.cloud.aws.credentials.secretKey=seu_secret_key
+spring.cloud.aws.region.static=regiao_da_fila
