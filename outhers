@@ -1,4 +1,7 @@
 
+Caused by: com.amazonaws.services.sqs.model.AmazonSQSException: The security token included in the request is expired (Service: AmazonSQS; Status Code: 403; Error Code: ExpiredToken; Request ID: 4b13cd59-b776-57cd-92ec-90e91c8e546a; Proxy: null)
+
+
 spring.cloud.aws.credentials.accessKey=seu_access_key
 spring.cloud.aws.credentials.secretKey=seu_secret_key
 spring.cloud.aws.region.static=regiao_da_fila
