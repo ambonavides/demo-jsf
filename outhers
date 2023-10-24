@@ -1,3 +1,36 @@
+import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+
+public class SQSExample {
+    public static void main(String[] args) {
+        String accessKeyId = "SEU_ACCESS_KEY_ID";
+        String secretKeyId = "SEU_SECRET_KEY_ID";
+        String sessionToken = "SEU_SESSION_TOKEN";
+        String queueUrl = "URL_DA_FILA"; // Substitua pelo URL real da fila
+
+        BasicSessionCredentials sessionCredentials = new BasicSessionCredentials(accessKeyId, secretKeyId, sessionToken);
+
+        AmazonSQS sqsClient = AmazonSQSClientBuilder.standard()
+                .withRegion(Regions.US_EAST_1) // Substitua pela região desejada
+                .withCredentials(new AWSStaticCredentialsProvider(sessionCredentials))
+                .build();
+
+        // Enviando uma mensagem para a fila
+        String messageBody = "Esta é uma mensagem de exemplo!";
+        SendMessageRequest sendMessageRequest = new SendMessageRequest(queueUrl, messageBody);
+        sqsClient.sendMessage(sendMessageRequest);
+
+        System.out.println("Mensagem enviada com sucesso!");
+    }
+}
+
+
+
+
+
 
 Caused by: com.amazonaws.services.sqs.model.AmazonSQSException: The security token included in the request is expired (Service: AmazonSQS; Status Code: 403; Error Code: ExpiredToken; Request ID: 4b13cd59-b776-57cd-92ec-90e91c8e546a; Proxy: null)
 
