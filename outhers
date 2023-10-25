@@ -1,3 +1,7 @@
+
+https://sqs.us-east-1.amazonaws.com/340614341484/AFJ_BALANCE_REQUEST_SANTANDER
+
+
 software.amazon.awssdk.services.sqs.model.SqsException: Credential must have exactly 5 slash-delimited elements, e.g. keyid/date/region/service/term, got 'bi+FDNJfbYVtKOZnatDs9omlfnpEwA2j/NuzksG5/20231024/us-east-1/sqs/aws4_request' (Service: Sqs, Status Code: 400, Request ID: e4b52fd7-f87c-5088-acc9-7265c8077537)
 
 
