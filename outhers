@@ -1,61 +1,24 @@
-
-https://sqs.us-east-1.amazonaws.com/340614341484/AFJ_BALANCE_REQUEST_SANTANDER
-
-
-software.amazon.awssdk.services.sqs.model.SqsException: Credential must have exactly 5 slash-delimited elements, e.g. keyid/date/region/service/term, got 'bi+FDNJfbYVtKOZnatDs9omlfnpEwA2j/NuzksG5/20231024/us-east-1/sqs/aws4_request' (Service: Sqs, Status Code: 400, Request ID: e4b52fd7-f87c-5088-acc9-7265c8077537)
-
-
-
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
-
-public class SQSExample {
-    public static void main(String[] args) {
-        String accessKeyId = "SEU_ACCESS_KEY_ID";
-        String secretKeyId = "SEU_SECRET_KEY_ID";
-        String sessionToken = "SEU_SESSION_TOKEN";
-        String queueUrl = "URL_DA_FILA"; // Substitua pelo URL real da fila
-
-        BasicSessionCredentials sessionCredentials = new BasicSessionCredentials(accessKeyId, secretKeyId, sessionToken);
-
-        AmazonSQS sqsClient = AmazonSQSClientBuilder.standard()
-                .withRegion(Regions.US_EAST_1) // Substitua pela região desejada
-                .withCredentials(new AWSStaticCredentialsProvider(sessionCredentials))
-                .build();
-
-        // Enviando uma mensagem para a fila
-        String messageBody = "Esta é uma mensagem de exemplo!";
-        SendMessageRequest sendMessageRequest = new SendMessageRequest(queueUrl, messageBody);
-        sqsClient.sendMessage(sendMessageRequest);
-
-        System.out.println("Mensagem enviada com sucesso!");
-    }
-}
-
-
-
-
-
-
-Caused by: com.amazonaws.services.sqs.model.AmazonSQSException: The security token included in the request is expired (Service: AmazonSQS; Status Code: 403; Error Code: ExpiredToken; Request ID: 4b13cd59-b776-57cd-92ec-90e91c8e546a; Proxy: null)
-
-
-spring.cloud.aws.credentials.accessKey=seu_access_key
-spring.cloud.aws.credentials.secretKey=seu_secret_key
-spring.cloud.aws.region.static=regiao_da_fila
-
-
-
-<!-- Para Maven -->
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-aws</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-aws-messaging</artifactId>
-</dependency>
-
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<configuration>
+					<excludes>
+						<exclude>**/*Application.java</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
