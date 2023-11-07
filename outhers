@@ -1,4 +1,6 @@
-			<plugin>
+docker run -d --rm --name sonarqube -p 9001:9000 -p 9092:9092 sonarqube
+
+<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
