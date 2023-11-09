@@ -1,26 +1,21 @@
-docker run -d --rm --name sonarqube -p 9001:9000 -p 9092:9092 sonarqube
+## Sonarqube local
+ - Passos para executar o Sonar localmente para validar os testes antes de subir no servidor.
 
-<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
-				<configuration>
-					<excludes>
-						<exclude>**/*Application.java</exclude>
-					</excludes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+```
+docker pull sonarqube
+docker run -d --rm --name sonarqube -p 9001:9000 -p 9092:9092 sonarqube
+```
+
+- Acessar via Web `http://127.0.0.1:9001", criar uma chave para o maven
+- Usuário e senha admin
+- Criar um nova senha admin!
+- Colocar no campo login o user "admin" e no campo password "admin" também.
+- Acessar menu Administration, depois o menu security->Users
+    - Ir na opção "Tokens" e gerar, pode dar qualquer nome, o importante é copiar o token gerado.
+    - Acessar o Arquivo sonarqube.sh na raiz do projeto, e colar o token na opção "-Dsonar.login"
+    - Dar autorização de execução para o arquivo sonarqube.sh, digite em seu terminal "chmod 777 sonarqube.sh".
+    - Execute o sonarqube.sh e navegue no sonaqube em seu navegador, clique no menu projects e veja seu projeto.
+
+- Acessar via Web `http://127.0.0.1:9001/account/security/`, criar uma chave para o maven
+
+```
